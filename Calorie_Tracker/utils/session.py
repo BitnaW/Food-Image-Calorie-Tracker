@@ -1,7 +1,7 @@
 """Session management utilities."""
 import streamlit as st
 from typing import Optional
-from ..domain import User
+from domain import User
 
 
 class SessionManager:

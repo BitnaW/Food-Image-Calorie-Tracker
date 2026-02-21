@@ -1,8 +1,8 @@
 """Login page."""
 import streamlit as st
-from ..database import get_database, DatabaseSchema
-from ..domain import User
-from ..utils import SessionManager, PasswordManager, AuthValidator
+from database import get_database, DatabaseSchema
+from domain import User
+from utils import SessionManager, PasswordManager, AuthValidator
 
 
 def show_login_form():

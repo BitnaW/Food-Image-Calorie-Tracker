@@ -4,7 +4,7 @@ from typing import Optional
 from PIL import Image
 import io
 
-from ..domain import ImageRecognitionResult, FoodItemDetection
+from domain import ImageRecognitionResult, FoodItemDetection
 
 
 class ImageRecognizer(ABC):

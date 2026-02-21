@@ -1,10 +1,10 @@
 """Image input and calorie tracking page."""
 import streamlit as st
 from datetime import datetime
-from ..backend import ImageProcessor
-from ..database import get_database
-from ..domain import CalorieEntry
-from ..utils import SessionManager
+from backend import ImageProcessor
+from database import get_database
+from domain import CalorieEntry
+from utils import SessionManager
 
 
 def main():

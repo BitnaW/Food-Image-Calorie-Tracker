@@ -1,9 +1,9 @@
 """User information page."""
 import streamlit as st
 from datetime import datetime
-from ..database import get_database
-from ..domain import User
-from ..utils import SessionManager
+from database import get_database
+from domain import User
+from utils import SessionManager
 
 
 def main():
