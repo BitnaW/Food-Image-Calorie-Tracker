@@ -8,11 +8,11 @@ The purpose of this project is to create a program that can
 Calorie trackers are a common tool used to help improve personal habits and discipline. This app seeks to reinvent that by improving on common gripes like difficulty in determining the true caloric content of a food, etc.
 
 Contributors:
-Sydnee Boothby
+Sydnee Boothby -
 sydnee.boothby@wsu.edu
 
-Ingrid Llorente
+Ingrid Llorente -
 ingrid.llorente@wsu.edu
 
-Bitna White
+Bitna White -
 bitna.white@wsu.edu
