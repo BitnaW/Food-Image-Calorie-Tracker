@@ -36,7 +36,7 @@ class LabelRecognizer(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3.1-pro-preview",
+                model="gemini-2.5-flash",
                 contents=[
                     """Analyze this food label and respond in this exact JSON format, no other text:
                     {
@@ -57,7 +57,14 @@ class LabelRecognizer(ImageRecognizer):
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
                 ])
 
-            data = json.loads(response.text)
+            # cleaning the response because sometimes there's symbols indicating it's a code block 
+            # returned from AI response
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            data = json.loads(raw.strip())
             
             result = ImageRecognitionResult(
                 success=True,
@@ -94,7 +101,7 @@ class VisualEstimator(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3.1-pro-preview",
+                model="gemini-2.5-flash",
                 contents=[
                     """Analyze this food image and respond in this exact JSON format, no other text:
                     {
@@ -115,7 +122,12 @@ class VisualEstimator(ImageRecognizer):
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
                 ])
             
-            data = json.loads(response.text)
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            data = json.loads(raw.strip())
 
             result = ImageRecognitionResult(
                 success=True,
