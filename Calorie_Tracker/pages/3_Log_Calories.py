@@ -1,4 +1,3 @@
-"""Image input and calorie tracking page."""
 import streamlit as st
 from datetime import datetime
 from backend import ImageProcessor
@@ -10,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def main():
-    """Main function for image input page."""
     SessionManager.require_authentication()(lambda: None)()
     
     st.title("Log Calories from Image")
@@ -22,7 +20,6 @@ def main():
         
         st.divider()
         
-        # Image upload section
         st.subheader("Upload Food Image")
         
         uploaded_file = st.file_uploader(
@@ -49,9 +46,7 @@ def main():
                         processor = ImageProcessor()
                         image_bytes = uploaded_file.read()
                         
-                        # Validate image
                         if processor.validate_image(image_bytes):
-                            # Process based on method
                             if method == "Label Recognition":
                                 result = processor.label_recognizer.recognize(image_bytes)
                             elif method == "Visual Estimation":
@@ -73,7 +68,6 @@ def main():
         
         st.divider()
         
-        # Manual entry section
         st.subheader("Or Log Calories Manually")
         
         col1, col2, col3 = st.columns(3)
@@ -105,16 +99,75 @@ def main():
                     food_type=food_type.lower(),
                     quantity=quantity,
                     unit=unit,
-                    source="manual",
+                    source="estimate",
                     notes=notes
                 )
-                # TODO: Save entry to database
-                st.success("Entry saved! (database integration coming soon)")
+                try:
+                    db = get_database()
+                    db.execute(
+                        """
+                        INSERT INTO calories
+                        (user_id, calories, food_name, food_type,
+                         quantity, unit, source, notes, logged_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            entry.user_id,
+                            entry.calories,
+                            entry.food_name,
+                            entry.food_type,
+                            entry.quantity,
+                            entry.unit,
+                            entry.source,
+                            entry.notes,
+                            entry.logged_at,
+                        )
+                    )
+                    st.success("Entry saved!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to save entry: {e}")
         
         st.divider()
         
         st.subheader("Recent Entries")
-        st.info("Recent entries will appear here - database integration needed")
+        
+        db = get_database()
+        
+        rows = db.fetch_all(
+            """
+            SELECT food_name, calories, quantity, unit, food_type,
+                   source, notes, logged_at
+            FROM calories
+            WHERE user_id = ?
+            ORDER BY logged_at DESC
+            LIMIT 10
+            """,
+            (user.id,)
+        )
+        
+        if rows:
+            for row in rows:
+                with st.container():
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        st.write(f"**{row['food_name']}**")
+                        st.write(
+                            f"{row['quantity']} {row['unit']} • "
+                            f"{row['food_type'].title()} • "
+                            f"Source: {row['source']}"
+                        )
+                        if row["notes"]:
+                            st.caption(row["notes"])
+                    
+                    with col2:
+                        st.metric("Calories", f"{row['calories']:.0f}")
+                    
+                    st.caption(f"Logged at: {row['logged_at']}")
+                    st.divider()
+        else:
+            st.info("No entries yet.")
     
     else:
         st.warning("Please log in first")
@@ -123,5 +176,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
