@@ -8,6 +8,7 @@ import os
 import io
 import json
 
+# base method for the other types of img recognizers to inherit from
 class ImageRecognizer(ABC):
     """Abstract base class for image recognition strategies."""
     
@@ -35,24 +36,26 @@ class LabelRecognizer(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-3.1-pro-preview",
                 contents=[
-                    """Analyze this food label image and respond in this exact JSON format, no other text:
+                    """Analyze this food label and respond in this exact JSON format, no other text:
                     {
                         "detected_items": [
                             {
-                                "food_name": "burger",
-                                "confidence": 0.9,
-                                "food_type": "protein"
+                                "calories": 350,
+                                "food_name": "Grilled Chicken Breast",
+                                "food_type": "protein",
+                                "quantity": 1,
+                                "unit": "serving",
+                                "source": "estimation",
+                                "notes": "Approximately 200g, lightly seasoned"
                             }
                         ],
                         "estimated_calories": 500,
                         "confidence_score": 0.8
                     }""",
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                ]
-                
-            )
+                ])
 
             data = json.loads(response.text)
             
@@ -64,10 +67,12 @@ class LabelRecognizer(ImageRecognizer):
                 confidence_score=data["confidence_score"]
             )
             return result
+        
         except Exception as e:
             return ImageRecognitionResult(
                 success=False,
                 method="label_recognition",
+                detected_items=[],
                 error_message=str(e)
             )
 
@@ -89,23 +94,26 @@ class VisualEstimator(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-3.1-pro-preview",
                 contents=[
                     """Analyze this food image and respond in this exact JSON format, no other text:
                     {
                         "detected_items": [
                             {
-                                "food_name": "burger",
-                                "confidence": 0.9,
-                                "food_type": "protein"
+                                "calories": 350,
+                                "food_name": "Grilled Chicken Breast",
+                                "food_type": "protein",
+                                "quantity": 1,
+                                "unit": "serving",
+                                "source": "estimation",
+                                "notes": "Approximately 200g, lightly seasoned"
                             }
                         ],
                         "estimated_calories": 500,
                         "confidence_score": 0.8
                     }""",
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                ]
-            )
+                ])
             
             data = json.loads(response.text)
 
@@ -117,14 +125,15 @@ class VisualEstimator(ImageRecognizer):
                 confidence_score=data["confidence_score"]
                 )
             return result
+        
         except Exception as e:
             return ImageRecognitionResult(
                 success=False,
                 method="visual_estimation",
+                detected_items=[],
                 error_message=str(e)
             )
             
-
 
 class ImageProcessor:
     """Main processor for image-based calorie extraction."""
