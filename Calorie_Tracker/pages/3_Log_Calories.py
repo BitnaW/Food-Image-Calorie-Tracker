@@ -80,7 +80,7 @@ def main():
             food_name = st.text_input("Food Name")
         
         with col2:
-            calories = st.number_input("Calories", min_value=0.0, step=0.1)
+            calories = st.number_input("Calories", min_value=0.0, step=0.10)
         
         with col3:
             food_type = st.selectbox(
@@ -88,7 +88,7 @@ def main():
                 ["Vegetable", "Protein", "Grain", "Fruit", "Dairy", "Fat", "Other"]
             )
         
-        quantity = st.number_input("Quantity", min_value=0.0, step=0.1)
+        quantity = st.number_input("Quantity", min_value=0.0, step=0.10)
         unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving(s)", "piece"])
         notes = st.text_area("Notes", height=80)
         
@@ -169,7 +169,7 @@ def main():
                             st.caption(row["notes"])
                     
                     with col2:
-                        st.metric("Calories", f"{row["calories"]:.0f}")
+                        st.metric("Calories", f"{row["calories"]:.01f}")
                     
                     with col3:
                         if st.button("Delete", key=f"delete_{row["logged_at"]}"):
@@ -179,12 +179,12 @@ def main():
                             st.rerun()
 
                     with st.expander("Edit"):
-                        new_calories = st.number_input("Calories", value=float(row['calories']), key=f"cal_{row['logged_at']}")
+                        new_calories = st.number_input("Calories", min_value=0.0, step=0.10, value=float(row['calories']), key=f"cal_{row['logged_at']}")
                         new_food_name = st.text_input("Food Name", value=row['food_name'], key=f"name_{row['logged_at']}")
                         new_food_type = st.selectbox("Food Type",["Vegetable", "Protein", "Grain", "Fruit", "Dairy", "Fat", "Other"],
                             index = unit.index(row["food_type"]) if row["food_type"] in unit else 0,
                             key=f"type_{row["logged_at"]}")
-                        new_food_qty = st.text_input("Quantity", value=row['quantity'], key=f"qty{row['logged_at']}")
+                        new_food_qty = st.number_input("Quantity", min_value=0.0, step=0.10, value=float(row['quantity']), key=f"qty{row['logged_at']}")
                         new_food_qty_unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving(s)", "piece"],
                             index = unit.index(row["unit"]) if row["unit"] in unit else 0, 
                             key=f"unit{row["logged_at"]}")
