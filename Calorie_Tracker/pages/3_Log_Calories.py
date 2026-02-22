@@ -5,6 +5,9 @@ from backend import ImageProcessor
 from database import get_database
 from domain import CalorieEntry
 from utils import SessionManager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def main():
     """Main function for image input page."""
@@ -42,7 +45,7 @@ def main():
                 
                 if st.button("Process Image", key="process_btn"):
                     with st.spinner("Processing image..."):
-                        # TODO: Implement image processing
+                        
                         processor = ImageProcessor()
                         image_bytes = uploaded_file.read()
                         
@@ -120,3 +123,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
