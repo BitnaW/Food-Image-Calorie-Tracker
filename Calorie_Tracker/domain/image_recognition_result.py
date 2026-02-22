@@ -6,7 +6,6 @@ from typing import Optional, List
 @dataclass
 class FoodItemDetection:
     """Represents a detected food item in an image."""
-    
     food_name: str
     confidence: float  # 0-1, confidence level
     food_type: str = None  # Generic category (e.g., "vegetable", "protein")

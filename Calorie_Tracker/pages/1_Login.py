@@ -42,6 +42,7 @@ def verify_user_credentials(username: str, password: str) -> bool:
 def show_login_form():
     st.title("CalorieCam")
 
+    
     if "auth_mode" not in st.session_state:
         st.session_state.auth_mode = "login"
 

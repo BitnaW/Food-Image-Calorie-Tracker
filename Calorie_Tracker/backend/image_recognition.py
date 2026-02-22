@@ -99,6 +99,7 @@ class VisualEstimator(ImageRecognizer):
                 confidence_score=data["confidence_score"]
                 )
             return result
+        
         except Exception as e:
             return ImageRecognitionResult(
                 success=False,
