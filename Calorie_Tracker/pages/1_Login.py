@@ -65,7 +65,7 @@ def show_login_form():
                         st.rerun()
                     else:
                         st.error("Invalid username or password")
-                        
+
         if st.button("Sign Up"):
             st.session_state.auth_mode = "signup"
             st.rerun()
@@ -73,63 +73,65 @@ def show_login_form():
     if st.session_state.auth_mode == "signup":
         st.subheader("Create Account")
         
+        with st.form("signup_form"):
 
-        new_username = st.text_input("New Username")
-        new_email = st.text_input("New Email")
-        new_password = st.text_input("New Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+            new_username = st.text_input("New Username")
+            new_email = st.text_input("New Email")
+            new_password = st.text_input("New Password", type="password")
+            confirm_password = st.text_input("Confirm Password", type="password")
+            submitted = st.form_submit_button("Submit")
         
 
 
-        if st.button("Enter"):
-            valid, msg = AuthValidator.validate_username(new_username)
-            if not valid:
-                st.error(msg)
-            else:
-                valid, msg = AuthValidator.validate_email(new_email)
+            if submitted:
+                valid, msg = AuthValidator.validate_username(new_username)
                 if not valid:
                     st.error(msg)
-                elif new_password != confirm_password:
-                    st.error("Passwords do not match")
                 else:
-                    valid, msg = AuthValidator.validate_password(new_password)
+                    valid, msg = AuthValidator.validate_email(new_email)
                     if not valid:
                         st.error(msg)
                     elif new_password != confirm_password:
                         st.error("Passwords do not match")
                     else:
-                        # Create user in database
-                        try:
-                            db = get_database()
-                            password_hash = PasswordManager.hash_password(new_password)
-                            
-                            db.execute(
-                                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-                                (new_username, new_email, password_hash)
-                            )
-
-                            # Fetch the newly created user
-                            result = db.fetch_one(
-                                "SELECT id, username, email, password_hash FROM users WHERE username = ?",
-                                (new_username,)
-                            )
-                            
-                            if result:
-                                # Log the user in automatically
-                                user = User(
-                                    id=result[0],
-                                    username=result[1],
-                                    email=result[2],
-                                    password_hash=result[3]
+                        valid, msg = AuthValidator.validate_password(new_password)
+                        if not valid:
+                            st.error(msg)
+                        elif new_password != confirm_password:
+                            st.error("Passwords do not match")
+                        else:
+                            # Create user in database
+                            try:
+                                db = get_database()
+                                password_hash = PasswordManager.hash_password(new_password)
+                                
+                                db.execute(
+                                    "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+                                    (new_username, new_email, password_hash)
                                 )
-                                SessionManager.set_user(user)
-                                st.success(f"Welcome, {new_username}!")
-                                st.rerun()
-                        except Exception as e:
-                            if "UNIQUE constraint failed" in str(e):
-                                st.error("Username or email already exists")
-                            else:
-                                st.error(f"Error creating account: {str(e)}")
+
+                                # Fetch the newly created user
+                                result = db.fetch_one(
+                                    "SELECT id, username, email, password_hash FROM users WHERE username = ?",
+                                    (new_username,)
+                                )
+                                
+                                if result:
+                                    # Log the user in automatically
+                                    user = User(
+                                        id=result[0],
+                                        username=result[1],
+                                        email=result[2],
+                                        password_hash=result[3]
+                                    )
+                                    SessionManager.set_user(user)
+                                    st.success(f"Welcome, {new_username}!")
+                                    st.rerun()
+                            except Exception as e:
+                                if "UNIQUE constraint failed" in str(e):
+                                    st.error("Username or email already exists")
+                                else:
+                                    st.error(f"Error creating account: {str(e)}")
 
         if st.button("Return to Login"):
             st.session_state.auth_mode = "login"
