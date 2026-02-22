@@ -4,7 +4,7 @@ from utils import SessionManager
 
 # Page configuration
 st.set_page_config(
-    page_title="Food Image Calorie Tracker",
+    page_title="Calorie Cam",
     page_icon="🍎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -18,7 +18,7 @@ except Exception:
     pass  # Database already initialized
 
 # Main app title
-st.title("🍎 Food Image Calorie Tracker")
+st.title("Calorie Cam")
 
 # Sidebar
 with st.sidebar:
