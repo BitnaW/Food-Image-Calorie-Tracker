@@ -55,12 +55,22 @@ def main():
                                 result = processor.process_image(image_bytes)
                             
                             if result.success:
-                                st.success("Image processed successfully!")
-                                st.json({
-                                    "method": result.method,
-                                    "calories": result.extracted_calories or result.estimated_calories,
-                                    "confidence": result.confidence_score
-                                })
+                                #st.success("Image processed successfully!")
+                                # st.json({
+                                #     "method": result.method,
+                                #     "info": result,
+                                #     "confidence": result.confidence_score
+                                # })
+
+                                db = get_database()
+                                for entry in result.convert_calorie_entires(user_id=user.id):
+                                    db.execute("""INSERT INTO calories (user_id, calories, food_name, 
+                                        food_type, quantity, unit, source, notes, logged_at)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                        tuple(entry.values()))
+                                
+                                st.success("Entry saved!")
+                                db.connection.commit()
                             else:
                                 st.warning(f"Processing not yet implemented: {result.error_message}")
                         else:
@@ -102,6 +112,7 @@ def main():
                     source="estimate",
                     notes=notes
                 )
+        
                 try:
                     db = get_database()
                     db.execute(
@@ -120,10 +131,12 @@ def main():
                             entry.unit,
                             entry.source,
                             entry.notes,
-                            entry.logged_at,
+                            entry.created_at
                         )
                     )
+                    db.connection.commit()
                     st.success("Entry saved!")
+                    
                     st.rerun()
                 except Exception as e:
                     st.error(f"Failed to save entry: {e}")
@@ -164,7 +177,7 @@ def main():
                     with col2:
                         st.metric("Calories", f"{row['calories']:.0f}")
                     
-                    st.caption(f"Logged at: {row['logged_at']}")
+                    #st.caption(f"Logged at: {row['logged_at']}")
                     st.divider()
         else:
             st.info("No entries yet.")

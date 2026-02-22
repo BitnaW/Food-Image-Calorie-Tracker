@@ -6,7 +6,9 @@ from google import genai
 from google.genai import types
 import os
 import io
+import json
 
+# base method for the other types of img recognizers to inherit from
 class ImageRecognizer(ABC):
     """Abstract base class for image recognition strategies."""
     
@@ -34,22 +36,50 @@ class LabelRecognizer(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-2.5-flash",
                 contents=[
-                    "Extract the nutritional information from this picture of a food label.",
+                    """Analyze this food label and respond in this exact JSON format, no other text:
+                    {
+                        "detected_items": [
+                            {
+                                "calories": 350,
+                                "food_name": "Grilled Chicken Breast",
+                                "food_type": "protein",
+                                "quantity": 1,
+                                "unit": "serving",
+                                "source": "estimation",
+                                "notes": "Approximately 200g, lightly seasoned"
+                            }
+                        ],
+                        "estimated_calories": 500,
+                        "confidence_score": 0.8
+                    }""",
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                ]
-            )
+                ])
+
+            # cleaning the response because sometimes there's symbols indicating it's a code block 
+            # returned from AI response
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            data = json.loads(raw.strip())
+            
             result = ImageRecognitionResult(
                 success=True,
                 method="label_recognition",
-                extracted_calories=response.text
+                detected_items=[FoodItemDetection(**item) for item in data["detected_items"]],
+                estimated_calories=data["estimated_calories"],
+                confidence_score=data["confidence_score"]
             )
             return result
+        
         except Exception as e:
             return ImageRecognitionResult(
                 success=False,
                 method="label_recognition",
+                detected_items=[],
                 error_message=str(e)
             )
 
@@ -71,25 +101,33 @@ class VisualEstimator(ImageRecognizer):
         """
         try:
             response = self.client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-2.5-flash",
                 contents=[
                     """Analyze this food image and respond in this exact JSON format, no other text:
                     {
                         "detected_items": [
                             {
-                                "food_name": "burger",
-                                "confidence": 0.9,
-                                "food_type": "protein"
+                                "calories": 350,
+                                "food_name": "Grilled Chicken Breast",
+                                "food_type": "protein",
+                                "quantity": 1,
+                                "unit": "serving",
+                                "source": "estimation",
+                                "notes": "Approximately 200g, lightly seasoned"
                             }
                         ],
                         "estimated_calories": 500,
                         "confidence_score": 0.8
                     }""",
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                ]
-            )
-            import json
-            data = json.loads(response.text)
+                ])
+            
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            data = json.loads(raw.strip())
 
             result = ImageRecognitionResult(
                 success=True,
@@ -99,14 +137,15 @@ class VisualEstimator(ImageRecognizer):
                 confidence_score=data["confidence_score"]
                 )
             return result
+        
         except Exception as e:
             return ImageRecognitionResult(
                 success=False,
                 method="visual_estimation",
+                detected_items=[],
                 error_message=str(e)
             )
             
-
 
 class ImageProcessor:
     """Main processor for image-based calorie extraction."""
