@@ -6,6 +6,7 @@ from domain import User
 from utils import SessionManager
 
 
+
 def main():
     """Main function for user information page."""
     SessionManager.require_authentication()(lambda: None)()

@@ -6,7 +6,6 @@ from database import get_database
 from domain import CalorieEntry
 from utils import SessionManager
 
-
 def main():
     """Main function for image input page."""
     SessionManager.require_authentication()(lambda: None)()
