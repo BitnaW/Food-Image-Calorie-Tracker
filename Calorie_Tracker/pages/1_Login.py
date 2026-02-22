@@ -49,19 +49,23 @@ def show_login_form():
     if st.session_state.auth_mode == "login":
         st.subheader("Sign In")
 
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        with st.form("login_form"):
+            
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Login")
 
-        if st.button("Login"):
-            if not username or not password:
-                st.error("Please enter both username and password")
-            else:
-                # Query database and verify credentials
-                if verify_user_credentials(username, password):
-                    st.success(f"Welcome back, {username}!")
-                    st.rerun()
+            if submitted:
+                if not username or not password:
+                    st.error("Please enter both username and password")
                 else:
-                    st.error("Invalid username or password")
+                    # Query database and verify credentials
+                    if verify_user_credentials(username, password):
+                        st.success(f"Welcome back, {username}!")
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password")
+                        
         if st.button("Sign Up"):
             st.session_state.auth_mode = "signup"
             st.rerun()
