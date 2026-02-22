@@ -169,10 +169,10 @@ def main():
                             st.caption(row["notes"])
                     
                     with col2:
-                        st.metric("Calories", f"{row["calories"]:.01f}")
+                        st.metric("Calories", f"{row['calories']:.01f}")
                     
                     with col3:
-                        if st.button("Delete", key=f"delete_{row["logged_at"]}"):
+                        if st.button("Delete", key=f"delete_{row['logged_at']}"):
                             db.execute("DELETE FROM calories WHERE user_id = ? AND logged_at = ?", 
                                 (user.id, row['logged_at']))
                             db.connection.commit()
@@ -183,14 +183,14 @@ def main():
                         new_food_name = st.text_input("Food Name", value=row['food_name'], key=f"name_{row['logged_at']}")
                         new_food_type = st.selectbox("Food Type",["Vegetable", "Protein", "Grain", "Fruit", "Dairy", "Fat", "Other"],
                             index = unit.index(row["food_type"]) if row["food_type"] in unit else 0,
-                            key=f"type_{row["logged_at"]}")
+                            key=f"type_{row['logged_at']}")
                         new_food_qty = st.number_input("Quantity", min_value=0.0, step=0.10, value=float(row['quantity']), key=f"qty{row['logged_at']}")
                         new_food_qty_unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving(s)", "piece"],
                             index = unit.index(row["unit"]) if row["unit"] in unit else 0, 
-                            key=f"unit{row["logged_at"]}")
+                            key=f"unit{row['logged_at']}")
                         new_notes = st.text_input("Notes", value=row["notes"] or "", key=f"notes_{row['logged_at']}")
                 
-                        if st.button("Save Changes", key=f"save_{row["logged_at"]}"):
+                        if st.button("Save Changes", key=f"save_{row['logged_at']}"):
                             db.execute("""UPDATE calories SET calories = ?, food_name = ?, food_type = ?, 
                                        quantity = ?, unit = ?, notes = ?
                                         WHERE user_id = ? AND logged_at = ?""",
