@@ -62,10 +62,9 @@ def show_login_form():
                     st.rerun()
                 else:
                     st.error("Invalid username or password")
-    
-    if st.button("Sign Up"):
-        st.session_state.auth_mode = "signup"
-        st.rerun()
+        if st.button("Sign Up"):
+            st.session_state.auth_mode = "signup"
+            st.rerun()
     
     if st.session_state.auth_mode == "signup":
         st.subheader("Create Account")
