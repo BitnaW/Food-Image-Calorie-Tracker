@@ -63,7 +63,7 @@ def main():
                                 st.success("Image processed successfully!")
                                 st.json({
                                     "method": result.method,
-                                    "calories": result.extracted_calories or result.estimated_calories,
+                                    "info": result,
                                     "confidence": result.confidence_score
                                 })
                             else:

@@ -6,6 +6,7 @@ from google import genai
 from google.genai import types
 import os
 import io
+import json
 
 class ImageRecognizer(ABC):
     """Abstract base class for image recognition strategies."""
@@ -36,14 +37,31 @@ class LabelRecognizer(ImageRecognizer):
             response = self.client.models.generate_content(
                 model="gemini-3-flash-preview",
                 contents=[
-                    "Extract the nutritional information from this picture of a food label.",
+                    """Analyze this food label image and respond in this exact JSON format, no other text:
+                    {
+                        "detected_items": [
+                            {
+                                "food_name": "burger",
+                                "confidence": 0.9,
+                                "food_type": "protein"
+                            }
+                        ],
+                        "estimated_calories": 500,
+                        "confidence_score": 0.8
+                    }""",
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
                 ]
+                
             )
+
+            data = json.loads(response.text)
+            
             result = ImageRecognitionResult(
                 success=True,
                 method="label_recognition",
-                extracted_calories=response.text
+                detected_items=[FoodItemDetection(**item) for item in data["detected_items"]],
+                estimated_calories=data["estimated_calories"],
+                confidence_score=data["confidence_score"]
             )
             return result
         except Exception as e:
@@ -88,7 +106,7 @@ class VisualEstimator(ImageRecognizer):
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
                 ]
             )
-            import json
+            
             data = json.loads(response.text)
 
             result = ImageRecognitionResult(

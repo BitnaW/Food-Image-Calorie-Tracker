@@ -18,7 +18,7 @@ class ImageRecognitionResult:
     
     success: bool
     method: str  # "label_recognition" or "visual_estimation"
-    detected_items: List[FoodItemDetection] = None
+    detected_items: List[FoodItemDetection] 
     extracted_calories: Optional[float] = None
     estimated_calories: Optional[float] = None
     confidence_score: Optional[float] = None
