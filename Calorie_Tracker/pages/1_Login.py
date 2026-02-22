@@ -74,6 +74,8 @@ def show_login_form():
         new_email = st.text_input("New Email")
         new_password = st.text_input("New Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
+        
+
 
         if st.button("Enter"):
             valid, msg = AuthValidator.validate_username(new_username)
@@ -124,6 +126,10 @@ def show_login_form():
                                 st.error("Username or email already exists")
                             else:
                                 st.error(f"Error creating account: {str(e)}")
+
+        if st.button("Return to Login"):
+            st.session_state.auth_mode = "login"
+            st.rerun()
 
 
 def main():
