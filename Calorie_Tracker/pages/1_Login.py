@@ -5,6 +5,35 @@ from domain import User
 from utils import SessionManager, PasswordManager, AuthValidator
 
 
+def verify_user_credentials(username: str, password: str) -> bool:
+    """Query database and verify user credentials."""
+    db = get_database()
+    
+    # Query user by username
+    result = db.fetch_one(
+        "SELECT id, username, email, password_hash FROM users WHERE username = ?",
+        (username,)
+    )
+    
+    if not result:
+        return False
+    
+    # Verify password
+    stored_hash = result[3]  # password_hash is at index 3
+    if not PasswordManager.verify_password(password, stored_hash):
+        return False
+    
+    # Create user object and set session
+    user = User(
+        id=result[0],
+        username=result[1],
+        email=result[2],
+        password_hash=stored_hash
+    )
+    SessionManager.set_user(user)
+    return True
+
+
 def show_login_form():
     """Display login form."""
     st.title("Login")
@@ -20,8 +49,12 @@ def show_login_form():
             if not username or not password:
                 st.error("Please enter both username and password")
             else:
-                # TODO: Query database and verify credentials
-                st.info("Login functionality coming soon - database integration needed")
+                # Query database and verify credentials
+                if verify_user_credentials(username, password):
+                    st.success(f"Welcome back, {username}!")
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
     
     with col2:
         st.subheader("Create Account")
@@ -46,8 +79,38 @@ def show_login_form():
                     elif new_password != confirm_password:
                         st.error("Passwords do not match")
                     else:
-                        # TODO: Create user in database
-                        st.info("Sign up functionality coming soon - database integration needed")
+                        # Create user in database
+                        try:
+                            db = get_database()
+                            password_hash = PasswordManager.hash_password(new_password)
+                            
+                            db.execute(
+                                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+                                (new_username, new_email, password_hash)
+                            )
+
+                            # Fetch the newly created user
+                            result = db.fetch_one(
+                                "SELECT id, username, email, password_hash FROM users WHERE username = ?",
+                                (new_username,)
+                            )
+                            
+                            if result:
+                                # Log the user in automatically
+                                user = User(
+                                    id=result[0],
+                                    username=result[1],
+                                    email=result[2],
+                                    password_hash=result[3]
+                                )
+                                SessionManager.set_user(user)
+                                st.success(f"Welcome, {new_username}!")
+                                st.rerun()
+                        except Exception as e:
+                            if "UNIQUE constraint failed" in str(e):
+                                st.error("Username or email already exists")
+                            else:
+                                st.error(f"Error creating account: {str(e)}")
 
 
 def main():

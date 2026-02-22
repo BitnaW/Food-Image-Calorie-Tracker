@@ -13,7 +13,7 @@ class DatabaseConnection:
     
     def connect(self):
         """Establish database connection."""
-        self.connection = sqlite3.connect(self.db_path)
+        self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
         return self.connection
     
