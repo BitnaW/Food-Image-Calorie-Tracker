@@ -47,12 +47,9 @@ with st.sidebar:
 st.divider()
 
 # Main content
-if not SessionManager.is_authenticated():
-    st.info("👈 Use the sidebar to navigate to the Login page")
-    st.switch_page("pages/1_Login.py")
-else:
-    st.subheader("Welcome!")
-    st.write(
+
+st.subheader("Welcome!")
+st.write(
         """
         This app helps you track calories from food images.
         
@@ -65,3 +62,5 @@ else:
         Use the navigation buttons on the left to get started.
         """
     )
+if st.button("Get Started"):
+     st.switch_page("pages/1_Login.py")
