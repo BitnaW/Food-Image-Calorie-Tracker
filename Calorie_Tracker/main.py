@@ -63,4 +63,7 @@ st.write(
         """
     )
 if st.button("Get Started"):
-     st.switch_page("pages/1_Login.py")
+     if SessionManager.is_authenticated():
+        st.switch_page("pages/3_Log_Calories.py")
+     else:
+        st.switch_page("pages/1_Login.py")
