@@ -5,8 +5,8 @@ This program was created using python and implemented Streamlit for developing t
 Calorie trackers are a common tool used to help improve personal habits and discipline. This app seeks to reinvent that by improving on common gripes like difficulty in determining the true caloric content of a food, uncertainties about meal portion sizes, and usefulness as a general health tool.
 
 ## Design
-![A whiteboard drawing of a UML style diagram depicting Calorie Cam's overall design.](<img width="3024" height="4032" alt="image" src="https://github.com/user-attachments/assets/a61c9532-19a3-4565-8918-2b884e2f5f9b" />
- "Whiteboard Program Design")
+<img width="3024" height="4032" alt="image" src="https://github.com/user-attachments/assets/7e8f7c89-2391-4c9d-ac55-c631cc05805b" />
+<img width="3645" height="2021" alt="image" src="https://github.com/user-attachments/assets/4e47fd01-c0a4-45a8-8393-6aa22ce7cb51" />
 
 ## Contributors:
 
