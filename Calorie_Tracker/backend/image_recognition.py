@@ -1,11 +1,11 @@
 """Image recognition module for calorie extraction."""
 from abc import ABC, abstractmethod
-from typing import Optional
 from PIL import Image
-import io
-
 from domain import ImageRecognitionResult, FoodItemDetection
-
+from google import genai
+from google.genai import types
+import os
+import io
 
 class ImageRecognizer(ABC):
     """Abstract base class for image recognition strategies."""
@@ -18,7 +18,10 @@ class ImageRecognizer(ABC):
 
 class LabelRecognizer(ImageRecognizer):
     """Recognizes nutritional labels in images."""
-    
+
+    def __init__(self):
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_AI_API_KEY"))
+            
     def recognize(self, image_bytes: bytes) -> ImageRecognitionResult:
         """
         Attempt to extract calorie information from a nutritional label.
@@ -30,13 +33,17 @@ class LabelRecognizer(ImageRecognizer):
             ImageRecognitionResult with extracted calories
         """
         try:
-            # TODO: Implement OCR to extract calorie info from label
-            # Could use pytesseract, EasyOCR, or cloud API like Google Vision
-            
+            response = self.client.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=[
+                    "Extract the nutritional information from this picture of a food label.",
+                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                ]
+            )
             result = ImageRecognitionResult(
-                success=False,
+                success=True,
                 method="label_recognition",
-                error_message="Label recognition not yet implemented"
+                notes=response.text
             )
             return result
         except Exception as e:
@@ -49,7 +56,9 @@ class LabelRecognizer(ImageRecognizer):
 
 class VisualEstimator(ImageRecognizer):
     """Estimates calories based on visual food detection and generic formulas."""
-    
+    def __init__(self):
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_AI_API_KEY"))
+            
     def recognize(self, image_bytes: bytes) -> ImageRecognitionResult:
         """
         Estimate calories based on detected food items.
@@ -61,14 +70,18 @@ class VisualEstimator(ImageRecognizer):
             ImageRecognitionResult with estimated calories
         """
         try:
-            # TODO: Implement food detection using:
-            # - YOLO, Faster R-CNN, or similar object detection model
-            # - Could use food-specific models or Google Vision API
+            response = self.client.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=[
+                    "What food is in this image? Estimate the calories and list each food item.",
+                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                ]
+            )
             
             result = ImageRecognitionResult(
-                success=False,
+                success=True,
                 method="visual_estimation",
-                error_message="Visual estimation not yet implemented"
+                notes=response.text
             )
             return result
         except Exception as e:

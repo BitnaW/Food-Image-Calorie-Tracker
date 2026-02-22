@@ -136,3 +136,6 @@ e2e_playwright/__snapshots__/*
 ########################################################################
 protoc-*-linux-x86_64.zip
 python_cache_key.md5
+
+# don't tell any secrets shhhhhh
+.env
