@@ -55,13 +55,7 @@ def main():
                                 result = processor.process_image(image_bytes)
                             
                             if result.success:
-                                #st.success("Image processed successfully!")
-                                # st.json({
-                                #     "method": result.method,
-                                #     "info": result,
-                                #     "confidence": result.confidence_score
-                                # })
-
+                               
                                 db = get_database()
                                 for entry in result.convert_calorie_entires(user_id=user.id):
                                     db.execute("""INSERT INTO calories (user_id, calories, food_name, 
@@ -72,7 +66,7 @@ def main():
                                 st.success("Entry saved!")
                                 db.connection.commit()
                             else:
-                                st.warning(f"Processing not yet implemented: {result.error_message}")
+                                st.warning(f"Processing error: {result.error_message}")
                         else:
                             st.error("Invalid image file")
         
@@ -95,7 +89,7 @@ def main():
             )
         
         quantity = st.number_input("Quantity", min_value=0.0, step=0.1)
-        unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving", "piece"])
+        unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving(s)", "piece"])
         notes = st.text_area("Notes", height=80)
         
         if st.button("Save Entry", key="save_entry_btn"):
@@ -162,7 +156,7 @@ def main():
         if rows:
             for row in rows:
                 with st.container():
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2, col3 = st.columns([3, 1, 1])
                     
                     with col1:
                         st.write(f"**{row['food_name']}**")
@@ -175,10 +169,46 @@ def main():
                             st.caption(row["notes"])
                     
                     with col2:
-                        st.metric("Calories", f"{row['calories']:.0f}")
+                        st.metric("Calories", f"{row["calories"]:.0f}")
                     
-                    #st.caption(f"Logged at: {row['logged_at']}")
+                    with col3:
+                        if st.button("Delete", key=f"delete_{row["logged_at"]}"):
+                            db.execute("DELETE FROM calories WHERE user_id = ? AND logged_at = ?", 
+                                (user.id, row['logged_at']))
+                            db.connection.commit()
+                            st.rerun()
+
+                    with st.expander("Edit"):
+                        new_calories = st.number_input("Calories", value=float(row['calories']), key=f"cal_{row['logged_at']}")
+                        new_food_name = st.text_input("Food Name", value=row['food_name'], key=f"name_{row['logged_at']}")
+                        new_food_type = st.selectbox("Food Type",["Vegetable", "Protein", "Grain", "Fruit", "Dairy", "Fat", "Other"],
+                            index = unit.index(row["food_type"]) if row["food_type"] in unit else 0,
+                            key=f"type_{row["logged_at"]}")
+                        new_food_qty = st.text_input("Quantity", value=row['quantity'], key=f"qty{row['logged_at']}")
+                        new_food_qty_unit = st.selectbox("Unit", ["grams", "oz", "cups", "serving(s)", "piece"],
+                            index = unit.index(row["unit"]) if row["unit"] in unit else 0, 
+                            key=f"unit{row["logged_at"]}")
+                        new_notes = st.text_input("Notes", value=row["notes"] or "", key=f"notes_{row['logged_at']}")
+                
+                        if st.button("Save Changes", key=f"save_{row["logged_at"]}"):
+                            db.execute("""UPDATE calories SET calories = ?, food_name = ?, food_type = ?, 
+                                       quantity = ?, unit = ?, notes = ?
+                                        WHERE user_id = ? AND logged_at = ?""",
+                                    (new_calories, new_food_name, new_food_type, new_food_qty, new_food_qty_unit,
+                                    new_notes,
+                                    user.id, row["logged_at"]))
+                            db.connection.commit()
+                            st.success("Updated!")
+                            st.rerun()
+
+                    # some datetime magic to make the timestamp caption way less specific
+                    logged_at = datetime.strptime(row["logged_at"], "%Y-%m-%d %H:%M:%S.%f")
+                    logged_at_formatted = logged_at.strftime("%b %d, %Y at %I:%M %p")
+                    st.caption(f"Logged: {logged_at_formatted}")
+
                     st.divider()
+
+                   
         else:
             st.info("No entries yet.")
     
