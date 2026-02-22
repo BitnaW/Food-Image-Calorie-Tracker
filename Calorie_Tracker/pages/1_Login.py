@@ -63,15 +63,20 @@ def show_login_form():
                 else:
                     st.error("Invalid username or password")
     
-    with col2:
+    if st.button("Sign Up"):
+        st.session_state.auth_mode = "signup"
+        st.rerun()
+    
+    if st.session_state.auth_mode == "signup":
         st.subheader("Create Account")
+        
 
         new_username = st.text_input("New Username")
         new_email = st.text_input("New Email")
         new_password = st.text_input("New Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
 
-        if st.button("Sign Up"):
+        if st.button("Enter"):
             valid, msg = AuthValidator.validate_username(new_username)
             if not valid:
                 st.error(msg)
