@@ -4,6 +4,11 @@ from database import get_database, DatabaseSchema
 from domain import User
 from utils import SessionManager, PasswordManager, AuthValidator
 
+st.set_page_config(
+    page_title="CalorieCam",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
 def verify_user_credentials(username: str, password: str) -> bool:
     """Query database and verify user credentials."""
@@ -35,17 +40,19 @@ def verify_user_credentials(username: str, password: str) -> bool:
 
 
 def show_login_form():
-    """Display login form."""
-    st.title("Login")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
+    st.title("CalorieCam")
+
+    if "auth_mode" not in st.session_state:
+        st.session_state.auth_mode = "login"
+
+    #login mode
+    if st.session_state.auth_mode == "login":
         st.subheader("Sign In")
+
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        
-        if st.button("Login", key="login_btn"):
+
+        if st.button("Login"):
             if not username or not password:
                 st.error("Please enter both username and password")
             else:
@@ -58,13 +65,13 @@ def show_login_form():
     
     with col2:
         st.subheader("Create Account")
+
         new_username = st.text_input("New Username")
-        new_email = st.text_input("Email")
+        new_email = st.text_input("New Email")
         new_password = st.text_input("New Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
-        
-        if st.button("Sign Up", key="signup_btn"):
-            # Validate inputs
+
+        if st.button("Sign Up"):
             valid, msg = AuthValidator.validate_username(new_username)
             if not valid:
                 st.error(msg)
@@ -72,6 +79,8 @@ def show_login_form():
                 valid, msg = AuthValidator.validate_email(new_email)
                 if not valid:
                     st.error(msg)
+                elif new_password != confirm_password:
+                    st.error("Passwords do not match")
                 else:
                     valid, msg = AuthValidator.validate_password(new_password)
                     if not valid:
@@ -130,6 +139,7 @@ def main():
             st.rerun()
     else:
         show_login_form()
+
 
 
 if __name__ == "__main__":
