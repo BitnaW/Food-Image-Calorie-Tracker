@@ -30,18 +30,18 @@ with st.sidebar:
         
         st.divider()
         
-        if st.button("📝 User Profile"):
+        if st.button("User Profile"):
             st.switch_page("pages/2_User_Info.py")
         
-        if st.button("📸 Log Calories"):
+        if st.button("Log Calories"):
             st.switch_page("pages/3_Log_Calories.py")
         
-        if st.button("🚪 Logout"):
+        if st.button("Logout"):
             SessionManager.logout()
             st.rerun()
     else:
         st.info("Please log in to continue")
-        if st.button("🔐 Go to Login"):
+        if st.button("Go to Login"):
             st.switch_page("pages/1_Login.py")
 
 st.divider()
@@ -54,10 +54,10 @@ st.write(
         This app helps you track calories from food images.
         
         **Features:**
-        - 📸 Upload food images for calorie analysis
-        - 🏷️ Extract calories from nutritional labels
-        - 📊 Manual calorie logging
-        - 👤 Track your nutrition over time
+        - Upload food images for calorie analysis
+        - Extract calories from nutritional labels
+        - Manual calorie logging
+        - Track your nutrition over time
         
         Use the navigation buttons on the left to get started.
         """
