@@ -139,3 +139,6 @@ python_cache_key.md5
 
 # don't tell any secrets shhhhhh
 .env
+
+# exclude db
+Calorie_Tracker/calories.db
